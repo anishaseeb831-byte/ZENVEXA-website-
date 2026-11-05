@@ -1,0 +1,359 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Global Safety Net (Default-Deny Catch-All)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // =========================================================================
+    // Hardened Global Primitives
+    // =========================================================================
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    // Zero-lookup bootstrapped admin check (safe inside `allow list` with zero O(n) reads)
+    function isAdminEmail() {
+      return isVerifiedUser() && request.auth.token.email == 'zenvexahub@gmail.com';
+    }
+
+    // Full admin check for single-document operations (bootstrapped email OR trusted DB record)
+    function isAdmin() {
+      return isAdminEmail() || (
+        isVerifiedUser() &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    // =========================================================================
+    // Validation Blueprints (Synchronized verbatim with firebase-blueprint.json)
+    // =========================================================================
+    function isValidAdminRecord(data) {
+      return data.keys().hasAll(['uid', 'label', 'createdAt']) &&
+        data.keys().hasOnly(['uid', 'label', 'createdAt']) &&
+        data.uid is string && data.uid.size() >= 1 && data.uid.size() <= 128 &&
+        data.uid.matches('^[a-zA-Z0-9_\\-]+$') &&
+        data.label is string && data.label.size() >= 2 && data.label.size() <= 80 &&
+        data.createdAt is timestamp;
+    }
+
+    function isValidInquiry(data) {
+      return data.keys().hasAll([
+          'clientId',
+          'fullName',
+          'email',
+          'businessName',
+          'country',
+          'serviceRequired',
+          'message',
+          'status',
+          'agencyNote',
+          'createdAt',
+          'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'clientId',
+          'fullName',
+          'email',
+          'businessName',
+          'country',
+          'serviceRequired',
+          'message',
+          'status',
+          'agencyNote',
+          'createdAt',
+          'updatedAt'
+        ]) &&
+        data.clientId is string && data.clientId.size() >= 1 && data.clientId.size() <= 128 &&
+        data.clientId.matches('^[a-zA-Z0-9_\\-]+$') &&
+        data.fullName is string && data.fullName.size() >= 1 && data.fullName.size() <= 120 &&
+        data.email is string && data.email.size() >= 3 && data.email.size() <= 160 &&
+        data.email.matches('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$') &&
+        data.businessName is string && data.businessName.size() >= 1 && data.businessName.size() <= 140 &&
+        data.country is string && data.country.size() >= 1 && data.country.size() <= 100 &&
+        data.serviceRequired is string && data.serviceRequired.size() >= 1 && data.serviceRequired.size() <= 140 &&
+        data.message is string && data.message.size() >= 10 && data.message.size() <= 2000 &&
+        data.status is string && data.status in ['new', 'in_review', 'responded', 'completed'] &&
+        data.agencyNote is string && data.agencyNote.size() <= 1500 &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidPortfolioProject(data) {
+      return data.keys().hasAll([
+          'authorId',
+          'title',
+          'category',
+          'statusLabel',
+          'shortDescription',
+          'detailedOverview',
+          'deliverables',
+          'toolsAndApproach',
+          'imageUrl',
+          'relatedService',
+          'visibility',
+          'createdAt',
+          'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'authorId',
+          'title',
+          'category',
+          'statusLabel',
+          'shortDescription',
+          'detailedOverview',
+          'deliverables',
+          'toolsAndApproach',
+          'imageUrl',
+          'relatedService',
+          'visibility',
+          'createdAt',
+          'updatedAt'
+        ]) &&
+        data.authorId is string && data.authorId.size() >= 1 && data.authorId.size() <= 128 &&
+        data.authorId.matches('^[a-zA-Z0-9_\\-]+$') &&
+        data.title is string && data.title.size() >= 2 && data.title.size() <= 140 &&
+        data.category is string && data.category in [
+          'Website Development',
+          'Social Media Designs',
+          'Branding & Logo Design',
+          'Marketing Campaigns',
+          'Advertising Creatives'
+        ] &&
+        data.statusLabel is string && data.statusLabel in [
+          'Client Project',
+          'Agency Concept Showcase'
+        ] &&
+        data.shortDescription is string && data.shortDescription.size() >= 10 && data.shortDescription.size() <= 320 &&
+        data.detailedOverview is string && data.detailedOverview.size() >= 10 && data.detailedOverview.size() <= 1500 &&
+        data.deliverables is list && data.deliverables.size() >= 1 && data.deliverables.size() <= 8 &&
+        data.deliverables[0] is string && data.deliverables[0].size() >= 2 && data.deliverables[0].size() <= 160 &&
+        data.toolsAndApproach is list && data.toolsAndApproach.size() >= 1 && data.toolsAndApproach.size() <= 6 &&
+        data.toolsAndApproach[0] is string && data.toolsAndApproach[0].size() >= 2 && data.toolsAndApproach[0].size() <= 80 &&
+        data.imageUrl is string && data.imageUrl.size() <= 600 &&
+        data.relatedService is string && data.relatedService.size() >= 2 && data.relatedService.size() <= 140 &&
+        data.visibility is string && data.visibility in ['published', 'draft'] &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidTestimonial(data) {
+      return data.keys().hasAll([
+          'authorId',
+          'displayName',
+          'roleAndCompany',
+          'reviewText',
+          'status',
+          'createdAt',
+          'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'authorId',
+          'displayName',
+          'roleAndCompany',
+          'reviewText',
+          'status',
+          'createdAt',
+          'updatedAt'
+        ]) &&
+        data.authorId is string && data.authorId.size() >= 1 && data.authorId.size() <= 128 &&
+        data.authorId.matches('^[a-zA-Z0-9_\\-]+$') &&
+        data.displayName is string && data.displayName.size() >= 2 && data.displayName.size() <= 80 &&
+        data.roleAndCompany is string && data.roleAndCompany.size() >= 2 && data.roleAndCompany.size() <= 120 &&
+        data.reviewText is string && data.reviewText.size() >= 15 && data.reviewText.size() <= 800 &&
+        data.status is string && data.status in ['pending', 'approved', 'rejected'] &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    // =========================================================================
+    // Collection 1: /admins/{adminId}
+    // =========================================================================
+    match /admins/{adminId} {
+      allow get: if isVerifiedUser() && isValidId(adminId) && (request.auth.uid == adminId || isAdmin());
+      allow list: if false;
+
+      allow create: if isVerifiedUser() &&
+        isValidId(adminId) &&
+        isValidAdminRecord(incoming()) &&
+        incoming().uid == adminId &&
+        incoming().createdAt == request.time &&
+        isAdmin();
+
+      allow update: if isVerifiedUser() &&
+        isValidId(adminId) &&
+        isValidAdminRecord(incoming()) &&
+        incoming().uid == existing().uid &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['label']) &&
+        isAdmin();
+
+      allow delete: if isVerifiedUser() && isValidId(adminId) && isAdmin();
+    }
+
+    // =========================================================================
+    // Collection 2: /inquiries/{inquiryId} (PII Strictly Isolated)
+    // =========================================================================
+    match /inquiries/{inquiryId} {
+      allow get: if isVerifiedUser() &&
+        isValidId(inquiryId) &&
+        (existing().clientId == request.auth.uid || isAdmin());
+
+      // Zero DB lookups inside list; strictly enforces owner or verified admin email
+      allow list: if isVerifiedUser() &&
+        (resource.data.clientId == request.auth.uid || isAdminEmail());
+
+      allow create: if isVerifiedUser() &&
+        isValidId(inquiryId) &&
+        isValidInquiry(incoming()) &&
+        incoming().clientId == request.auth.uid &&
+        incoming().status == 'new' &&
+        incoming().agencyNote == '' &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+
+      allow update: if isVerifiedUser() &&
+        isValidId(inquiryId) &&
+        isValidInquiry(incoming()) &&
+        incoming().clientId == existing().clientId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time && (
+          // Action 1: Owning client updates message details while inquiry is still 'new' (locked once progressed/completed)
+          (
+            existing().clientId == request.auth.uid &&
+            existing().status == 'new' &&
+            incoming().status == 'new' &&
+            incoming().agencyNote == existing().agencyNote &&
+            incoming().diff(existing()).affectedKeys().hasOnly(['message', 'serviceRequired', 'updatedAt'])
+          ) ||
+          // Action 2: Verified ZENVEXA Admin updates workflow status or agency response note (includes override)
+          (
+            isAdmin() &&
+            incoming().diff(existing()).affectedKeys().hasOnly(['status', 'agencyNote', 'updatedAt'])
+          )
+        );
+
+      allow delete: if isVerifiedUser() && isValidId(inquiryId) && isAdmin();
+    }
+
+    // =========================================================================
+    // Collection 3: /portfolioProjects/{projectId}
+    // =========================================================================
+    match /portfolioProjects/{projectId} {
+      allow get: if isValidId(projectId) &&
+        (existing().visibility == 'published' || isAdmin());
+
+      allow list: if resource.data.visibility == 'published' || isAdminEmail();
+
+      allow create: if isVerifiedUser() &&
+        isValidId(projectId) &&
+        isValidPortfolioProject(incoming()) &&
+        incoming().authorId == request.auth.uid &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time &&
+        isAdmin();
+
+      allow update: if isVerifiedUser() &&
+        isValidId(projectId) &&
+        isValidPortfolioProject(incoming()) &&
+        incoming().authorId == existing().authorId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'title',
+          'category',
+          'statusLabel',
+          'shortDescription',
+          'detailedOverview',
+          'deliverables',
+          'toolsAndApproach',
+          'imageUrl',
+          'relatedService',
+          'visibility',
+          'updatedAt'
+        ]) &&
+        isAdmin();
+
+      allow delete: if isVerifiedUser() && isValidId(projectId) && isAdmin();
+    }
+
+    // =========================================================================
+    // Collection 4: /testimonials/{testimonialId} (PII-Free, Moderation-Gated)
+    // =========================================================================
+    match /testimonials/{testimonialId} {
+      allow get: if isValidId(testimonialId) && (
+        existing().status == 'approved' ||
+        (isVerifiedUser() && existing().authorId == request.auth.uid) ||
+        isAdmin()
+      );
+
+      allow list: if resource.data.status == 'approved' ||
+        (isVerifiedUser() && resource.data.authorId == request.auth.uid) ||
+        isAdminEmail();
+
+      allow create: if isVerifiedUser() &&
+        isValidId(testimonialId) &&
+        isValidTestimonial(incoming()) &&
+        incoming().authorId == request.auth.uid &&
+        incoming().status == 'pending' &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+
+      allow update: if isVerifiedUser() &&
+        isValidId(testimonialId) &&
+        isValidTestimonial(incoming()) &&
+        incoming().authorId == existing().authorId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time && (
+          // Action 1: Author edits own pending review prior to terminal moderation decision
+          (
+            existing().authorId == request.auth.uid &&
+            existing().status == 'pending' &&
+            incoming().status == 'pending' &&
+            incoming().diff(existing()).affectedKeys().hasOnly([
+              'displayName',
+              'roleAndCompany',
+              'reviewText',
+              'updatedAt'
+            ])
+          ) ||
+          // Action 2: Verified ZENVEXA Admin moderates status or curates display fields
+          (
+            isAdmin() &&
+            incoming().diff(existing()).affectedKeys().hasOnly([
+              'status',
+              'displayName',
+              'roleAndCompany',
+              'reviewText',
+              'updatedAt'
+            ])
+          )
+        );
+
+      allow delete: if isVerifiedUser() &&
+        isValidId(testimonialId) &&
+        (
+          (existing().authorId == request.auth.uid && existing().status == 'pending') ||
+          isAdmin()
+        );
+    }
+  }
+}

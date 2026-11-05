@@ -1,0 +1,292 @@
+{
+  "entities": {
+    "AdminRecord": {
+      "title": "AdminRecord",
+      "description": "Trusted agency administrator lookup document keyed by Firebase Auth UID.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Firebase Auth UID of the administrator.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "label": {
+          "type": "string",
+          "description": "Display label or role note for the administrator.",
+          "minLength": 2,
+          "maxLength": 80
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the admin record was created."
+        }
+      },
+      "required": ["uid", "label", "createdAt"]
+    },
+    "Inquiry": {
+      "title": "Inquiry",
+      "description": "Client project inquiry containing contact details (PII) strictly isolated to the submitting client and verified agency admins.",
+      "type": "object",
+      "properties": {
+        "clientId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the submitting client.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "fullName": {
+          "type": "string",
+          "description": "Client full name.",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Client business email address.",
+          "minLength": 3,
+          "maxLength": 160,
+          "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"
+        },
+        "businessName": {
+          "type": "string",
+          "description": "Client company or brand name.",
+          "minLength": 1,
+          "maxLength": 140
+        },
+        "country": {
+          "type": "string",
+          "description": "Client country or market.",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "serviceRequired": {
+          "type": "string",
+          "description": "Selected ZENVEXA digital service.",
+          "minLength": 1,
+          "maxLength": 140
+        },
+        "message": {
+          "type": "string",
+          "description": "Detailed project scope and objectives.",
+          "minLength": 10,
+          "maxLength": 2000
+        },
+        "status": {
+          "type": "string",
+          "description": "Workflow stage of the inquiry.",
+          "enum": ["new", "in_review", "responded", "completed"]
+        },
+        "agencyNote": {
+          "type": "string",
+          "description": "Official response or scoping note written by ZENVEXA agency admins.",
+          "minLength": 0,
+          "maxLength": 1500
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Immutable server creation timestamp."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of the latest update."
+        }
+      },
+      "required": [
+        "clientId",
+        "fullName",
+        "email",
+        "businessName",
+        "country",
+        "serviceRequired",
+        "message",
+        "status",
+        "agencyNote",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "PortfolioProject": {
+      "title": "PortfolioProject",
+      "description": "Publicly showcaseable agency portfolio or capability project managed exclusively by verified ZENVEXA administrators.",
+      "type": "object",
+      "properties": {
+        "authorId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the ZENVEXA admin who published the project.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "title": {
+          "type": "string",
+          "description": "Project showcase title.",
+          "minLength": 2,
+          "maxLength": 140
+        },
+        "category": {
+          "type": "string",
+          "description": "ZENVEXA portfolio discipline category.",
+          "enum": [
+            "Website Development",
+            "Social Media Designs",
+            "Branding & Logo Design",
+            "Marketing Campaigns",
+            "Advertising Creatives"
+          ]
+        },
+        "statusLabel": {
+          "type": "string",
+          "description": "Distinguishes live client work from agency concept showcases.",
+          "enum": ["Client Project", "Agency Concept Showcase"]
+        },
+        "shortDescription": {
+          "type": "string",
+          "description": "Card summary description.",
+          "minLength": 10,
+          "maxLength": 320
+        },
+        "detailedOverview": {
+          "type": "string",
+          "description": "Extended modal overview of project goals and execution.",
+          "minLength": 10,
+          "maxLength": 1500
+        },
+        "deliverables": {
+          "type": "array",
+          "description": "Bounded list of up to 8 deliverable strings.",
+          "minLength": 1,
+          "maxLength": 8
+        },
+        "toolsAndApproach": {
+          "type": "array",
+          "description": "Bounded list of up to 6 approach tags.",
+          "minLength": 1,
+          "maxLength": 6
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "Optional external or asset cover URL.",
+          "minLength": 0,
+          "maxLength": 600
+        },
+        "relatedService": {
+          "type": "string",
+          "description": "Associated ZENVEXA service title.",
+          "minLength": 2,
+          "maxLength": 140
+        },
+        "visibility": {
+          "type": "string",
+          "description": "Controls whether the project is visible in public queries.",
+          "enum": ["published", "draft"]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Immutable server creation timestamp."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of the latest update."
+        }
+      },
+      "required": [
+        "authorId",
+        "title",
+        "category",
+        "statusLabel",
+        "shortDescription",
+        "detailedOverview",
+        "deliverables",
+        "toolsAndApproach",
+        "imageUrl",
+        "relatedService",
+        "visibility",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Testimonial": {
+      "title": "Testimonial",
+      "description": "PII-free client feedback record submitted by verified users and moderated by ZENVEXA admins before public display.",
+      "type": "object",
+      "properties": {
+        "authorId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the review author.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Public attribution name chosen by the client.",
+          "minLength": 2,
+          "maxLength": 80
+        },
+        "roleAndCompany": {
+          "type": "string",
+          "description": "Client title and company attribution.",
+          "minLength": 2,
+          "maxLength": 120
+        },
+        "reviewText": {
+          "type": "string",
+          "description": "Client review body.",
+          "minLength": 15,
+          "maxLength": 800
+        },
+        "status": {
+          "type": "string",
+          "description": "Moderation state. Clients can only create as pending; admins approve or reject.",
+          "enum": ["pending", "approved", "rejected"]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Immutable server creation timestamp."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of the latest update."
+        }
+      },
+      "required": [
+        "authorId",
+        "displayName",
+        "roleAndCompany",
+        "reviewText",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/admins/{adminId}": {
+      "schema": { "$ref": "#/entities/AdminRecord" },
+      "description": "Trusted administrator registry keyed by UID."
+    },
+    "/inquiries/{inquiryId}": {
+      "schema": { "$ref": "#/entities/Inquiry" },
+      "description": "Private client project inquiries containing PII, isolated to the owner client and verified admins."
+    },
+    "/portfolioProjects/{projectId}": {
+      "schema": { "$ref": "#/entities/PortfolioProject" },
+      "description": "Agency portfolio projects managed by admins; only published items are readable publicly."
+    },
+    "/testimonials/{testimonialId}": {
+      "schema": { "$ref": "#/entities/Testimonial" },
+      "description": "Moderation-gated client reviews without PII."
+    }
+  }
+}
