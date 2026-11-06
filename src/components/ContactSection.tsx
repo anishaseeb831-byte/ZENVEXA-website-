@@ -22,6 +22,8 @@ import {
   COMPANY_INFO,
   SERVICES_DATA,
   buildWhatsAppUrl,
+  buildAwaisWhatsAppUrl,
+  buildPhoneCallUrl,
   buildMailtoUrl,
   RoutePath,
 } from '../data/agencyData';
@@ -444,25 +446,79 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
               </div>
 
               <div className="pt-4 border-t border-indigo-100/80 space-y-3.5">
-                <a
-                  href={buildWhatsAppUrl()}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex items-start gap-3.5 p-3.5 rounded-2xl bg-[#FAF9FE] hover:bg-white border border-indigo-100/80 hover:border-indigo-300 transition-all"
-                >
-                  <div className="w-10 h-10 rounded-xl bg-brand-gradient text-white flex items-center justify-center shrink-0 shadow-xs">
-                    <Phone className="w-4 h-4" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-xs text-slate-500">
-                      WhatsApp Consultation
+                {/* 1. Anis (Founder) */}
+                <div className="p-3.5 rounded-2xl bg-[#FAF9FE] border border-indigo-100/80 hover:border-indigo-300 transition-all space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-brand-gradient text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
+                        AN
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-[#0B0F19]">
+                          {COMPANY_INFO.founder} (Founder)
+                        </div>
+                        <div className="text-[11px] text-slate-500 font-mono">
+                          {COMPANY_INFO.founderWhatsappDisplay}
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-sm font-bold text-[#0B0F19] flex items-center gap-1.5">
-                      <span>{COMPANY_INFO.whatsappDisplay}</span>
-                      <ArrowUpRight className="w-3.5 h-3.5 text-[#6A35FF]" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 pt-1">
+                    <a
+                      href={buildWhatsAppUrl()}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition-colors shadow-2xs"
+                    >
+                      <MessageCircle className="w-3.5 h-3.5" />
+                      <span>WhatsApp</span>
+                    </a>
+                    <a
+                      href={buildPhoneCallUrl(COMPANY_INFO.founderPhone)}
+                      className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 text-xs font-semibold transition-colors"
+                    >
+                      <Phone className="w-3.5 h-3.5" />
+                      <span>Call Now</span>
+                    </a>
+                  </div>
+                </div>
+
+                {/* 2. Awais (Representative / Partner) */}
+                <div className="p-3.5 rounded-2xl bg-[#FAF9FE] border border-indigo-100/80 hover:border-indigo-300 transition-all space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-[#553BF6] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
+                        AW
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-[#0B0F19]">
+                          {COMPANY_INFO.representative} (Representative)
+                        </div>
+                        <div className="text-[11px] text-slate-500 font-mono">
+                          {COMPANY_INFO.representativeWhatsappDisplay}
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </a>
+                  <div className="grid grid-cols-2 gap-2 pt-1">
+                    <a
+                      href={buildAwaisWhatsAppUrl()}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition-colors shadow-2xs"
+                    >
+                      <MessageCircle className="w-3.5 h-3.5" />
+                      <span>WhatsApp</span>
+                    </a>
+                    <a
+                      href={buildPhoneCallUrl(COMPANY_INFO.representativePhone)}
+                      className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 text-xs font-semibold transition-colors"
+                    >
+                      <Phone className="w-3.5 h-3.5" />
+                      <span>Call Now</span>
+                    </a>
+                  </div>
+                </div>
 
                 <a
                   href={buildMailtoUrl()}
@@ -775,8 +831,8 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
 
                 <p className="text-xs text-slate-500">
                   {user
-                    ? `Signed in as ${user.email}. Online submissions are stored in your private Client Portal, or you can message us directly via WhatsApp (${COMPANY_INFO.whatsappDisplay}) or Email (${COMPANY_INFO.email}).`
-                    : `Online submissions verify with Google so you can track agency responses in the Client Portal—or use WhatsApp (${COMPANY_INFO.whatsappDisplay}) or Email (${COMPANY_INFO.email}) immediately without signing in.`}
+                    ? `Signed in as ${user.email}. Online inquiries save to your private Client Portal, or you can contact Founder Anis (${COMPANY_INFO.founderWhatsappDisplay}) or Representative Awais (${COMPANY_INFO.representativeWhatsappDisplay}) directly.`
+                    : `Inquiries verify with Google so you can track responses in the Client Portal—or contact Founder Anis (${COMPANY_INFO.founderWhatsappDisplay}) or Representative Awais (${COMPANY_INFO.representativeWhatsappDisplay}) directly on WhatsApp or phone.`}
                 </p>
               </div>
             </form>

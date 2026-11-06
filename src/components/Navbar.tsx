@@ -16,6 +16,9 @@ import {
   Compass,
   LineChart,
   MessageCircle,
+  Sun,
+  Moon,
+  Presentation,
 } from 'lucide-react';
 import {
   COMPANY_INFO,
@@ -26,6 +29,7 @@ import {
   buildWhatsAppUrl,
 } from '../data/agencyData';
 import { useFirebase } from '../context/FirebaseContext';
+import { useTheme } from '../context/ThemeContext';
 
 interface NavbarProps {
   currentPath: RoutePath;
@@ -62,6 +66,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onGetQuote,
 }) => {
   const { isAdmin } = useFirebase();
+  const { theme, toggleTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
@@ -114,8 +119,8 @@ export const Navbar: React.FC<NavbarProps> = ({
     <header
       className={`sticky top-0 z-50 w-full transition-all duration-150 ${
         scrolled
-          ? 'bg-white/95 backdrop-blur-md border-b border-indigo-100/90 shadow-xs'
-          : 'bg-white border-b border-slate-100/80'
+          ? 'bg-white/95 dark:bg-[#080B14]/95 backdrop-blur-md border-b border-indigo-100/90 dark:border-slate-800 shadow-xs'
+          : 'bg-white dark:bg-[#080B14] border-b border-slate-100/80 dark:border-slate-800/80'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-8">
@@ -130,9 +135,9 @@ export const Navbar: React.FC<NavbarProps> = ({
             src={COMPANY_INFO.logoPath}
             alt="ZENVEXA Digital Agency Logo"
             referrerPolicy="no-referrer"
-            className="h-10 w-10 rounded-xl object-cover bg-white border border-indigo-100 shadow-2xs shrink-0"
+            className="h-10 w-10 rounded-xl object-cover bg-white border border-indigo-100 dark:border-slate-800 shadow-2xs shrink-0"
           />
-          <span className="text-lg font-extrabold tracking-tight text-[#0B0F19] whitespace-nowrap">
+          <span className="text-lg font-extrabold tracking-tight text-[#0B0F19] dark:text-white whitespace-nowrap">
             ZENVEXA
           </span>
         </a>
@@ -277,8 +282,37 @@ export const Navbar: React.FC<NavbarProps> = ({
           })}
         </nav>
 
-        {/* Zone 3: Prominent Purple Gradient "Get a Free Quote" CTA + Mobile Trigger */}
-        <div className="flex items-center gap-3 shrink-0">
+        {/* Zone 3: Theme Toggle + "Get a Free Quote" CTA + Mobile Trigger */}
+        <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+          {/* Light / Dark Mode Toggle Button */}
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-label={
+              theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'
+            }
+            title={
+              theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'
+            }
+            className="w-10 h-10 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 bg-white/90 dark:bg-slate-900/90 hover:bg-[#F5F3FF] dark:hover:bg-slate-800 transition-colors flex items-center justify-center cursor-pointer shadow-2xs"
+          >
+            {theme === 'dark' ? (
+              <Sun className="w-4 h-4 text-amber-400" />
+            ) : (
+              <Moon className="w-4 h-4 text-[#6A35FF]" />
+            )}
+          </button>
+
+          <a
+            href="/workspace"
+            onClick={(e) => handleNavClick(e, '/workspace')}
+            title="Google Slides & Gmail Workspace"
+            className="hidden md:inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-[#6A35FF] dark:hover:text-white rounded-xl hover:bg-[#F5F3FF] dark:hover:bg-slate-800 transition-colors"
+          >
+            <Presentation className="w-4 h-4 text-[#6A35FF]" />
+            <span>Workspace</span>
+          </a>
+
           <button
             type="button"
             onClick={onGetQuote}
@@ -291,7 +325,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             type="button"
             onClick={() => setMobileMenuOpen((prev) => !prev)}
-            className="lg:hidden inline-flex items-center justify-center w-11 h-11 rounded-xl text-slate-700 hover:text-[#0B0F19] hover:bg-[#F5F3FF] transition-colors focus-visible:outline-2 focus-visible:outline-[#6A35FF] cursor-pointer"
+            className="lg:hidden inline-flex items-center justify-center w-10 h-10 rounded-xl text-slate-700 dark:text-slate-200 hover:text-[#0B0F19] dark:hover:text-white hover:bg-[#F5F3FF] dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 transition-colors focus-visible:outline-2 focus-visible:outline-[#6A35FF] cursor-pointer"
             aria-expanded={mobileMenuOpen}
             aria-controls="mobile-navigation-drawer"
             aria-label={
@@ -311,7 +345,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       {mobileMenuOpen && (
         <div
           id="mobile-navigation-drawer"
-          className="lg:hidden bg-white border-b border-indigo-100 shadow-xl max-h-[85vh] overflow-y-auto"
+          className="lg:hidden bg-white dark:bg-[#080B14] border-b border-indigo-100 dark:border-slate-800 shadow-xl max-h-[85vh] overflow-y-auto"
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 space-y-1">
             {NAV_ITEMS.map((item) => {
@@ -410,7 +444,44 @@ export const Navbar: React.FC<NavbarProps> = ({
               <ShieldCheck className="w-4 h-4 text-[#6A35FF]" />
             </a>
 
-            <div className="pt-3 mt-2 border-t border-slate-100">
+            <a
+              href="/workspace"
+              onClick={(e) => handleNavClick(e, '/workspace')}
+              className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                currentPath === '/workspace'
+                  ? 'bg-[#F5F3FF] text-[#6A35FF] font-semibold'
+                  : 'text-slate-700 hover:bg-slate-50 hover:text-[#0B0F19]'
+              }`}
+            >
+              <span>Google Slides &amp; Gmail</span>
+              <Presentation className="w-4 h-4 text-[#6A35FF]" />
+            </a>
+
+            {/* Mobile Theme Toggle Row */}
+            <div className="pt-2 mt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between px-3.5 py-2.5">
+              <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+                Appearance
+              </span>
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-200 cursor-pointer"
+              >
+                {theme === 'dark' ? (
+                  <>
+                    <Sun className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Light Mode</span>
+                  </>
+                ) : (
+                  <>
+                    <Moon className="w-3.5 h-3.5 text-[#6A35FF]" />
+                    <span>Dark Mode</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+            <div className="pt-2">
               <button
                 type="button"
                 onClick={() => {

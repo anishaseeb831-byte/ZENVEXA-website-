@@ -28,9 +28,11 @@ import {
   Eye,
   EyeOff,
   LayoutDashboard,
+  Presentation,
 } from 'lucide-react';
 import { useFirebase } from '../context/FirebaseContext';
 import { ClientDashboardView } from './ClientDashboardView';
+import { GoogleWorkspaceHub } from './GoogleWorkspaceHub';
 import {
   db,
   handleFirestoreError,
@@ -129,11 +131,11 @@ export const PortalSection: React.FC<PortalSectionProps> = ({ onNavigate }) => {
     useFirebase();
 
   const [activeAdminTab, setActiveAdminTab] = useState<
-    'inquiries' | 'portfolio' | 'reviews' | 'client_preview'
+    'inquiries' | 'portfolio' | 'reviews' | 'client_preview' | 'workspace'
   >('inquiries');
 
   const [activeClientTab, setActiveClientTab] = useState<
-    'dashboard' | 'inquiries' | 'reviews'
+    'dashboard' | 'inquiries' | 'reviews' | 'workspace'
   >('dashboard');
 
   const [inquiries, setInquiries] = useState<CloudInquiryRecord[]>([]);
@@ -691,6 +693,21 @@ export const PortalSection: React.FC<PortalSectionProps> = ({ onNavigate }) => {
                     <LayoutDashboard className="w-4 h-4" />
                     <span>Client Dashboard Preview</span>
                   </button>
+
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={activeAdminTab === 'workspace'}
+                    onClick={() => setActiveAdminTab('workspace')}
+                    className={`inline-flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-xl transition-all cursor-pointer ${
+                      activeAdminTab === 'workspace'
+                        ? 'bg-brand-gradient text-white shadow-xs'
+                        : 'text-slate-600 hover:text-[#0B0F19]'
+                    }`}
+                  >
+                    <Presentation className="w-4 h-4" />
+                    <span>Slides &amp; Gmail</span>
+                  </button>
                 </div>
 
                 {/* Tab 1: Admin Inquiries Inbox */}
@@ -1202,6 +1219,9 @@ export const PortalSection: React.FC<PortalSectionProps> = ({ onNavigate }) => {
                     />
                   </div>
                 )}
+
+                {/* Tab 5: Admin Google Workspace Hub */}
+                {activeAdminTab === 'workspace' && <GoogleWorkspaceHub />}
               </div>
             ) : (
               /* ============================================================== */
@@ -1257,6 +1277,21 @@ export const PortalSection: React.FC<PortalSectionProps> = ({ onNavigate }) => {
                     <MessageSquareQuote className="w-4 h-4" />
                     <span>My Reviews ({reviews.length})</span>
                   </button>
+
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={activeClientTab === 'workspace'}
+                    onClick={() => setActiveClientTab('workspace')}
+                    className={`inline-flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-xl transition-all cursor-pointer ${
+                      activeClientTab === 'workspace'
+                        ? 'bg-brand-gradient text-white shadow-xs'
+                        : 'text-slate-600 hover:text-[#0B0F19]'
+                    }`}
+                  >
+                    <Presentation className="w-4 h-4" />
+                    <span>Slides &amp; Gmail</span>
+                  </button>
                 </div>
 
                 {/* Tab 1: Client Active Dashboard & Progress Trackers */}
@@ -1269,8 +1304,11 @@ export const PortalSection: React.FC<PortalSectionProps> = ({ onNavigate }) => {
                   />
                 )}
 
-                {/* Tab 2 & 3: Client Inquiries & Reviews */}
-                {activeClientTab !== 'dashboard' && (
+                {/* Tab 2: Client Google Workspace Hub (Slides & Gmail) */}
+                {activeClientTab === 'workspace' && <GoogleWorkspaceHub />}
+
+                {/* Tab 3 & 4: Client Inquiries & Reviews */}
+                {(activeClientTab === 'inquiries' || activeClientTab === 'reviews') && (
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                     <div className="lg:col-span-8 space-y-4">
                       <h2 className="text-lg font-extrabold text-[#0B0F19]">

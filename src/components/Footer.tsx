@@ -12,6 +12,8 @@ import {
   SERVICES_DATA,
   RoutePath,
   buildWhatsAppUrl,
+  buildAwaisWhatsAppUrl,
+  buildPhoneCallUrl,
   buildMailtoUrl,
 } from '../data/agencyData';
 
@@ -180,19 +182,60 @@ export const Footer: React.FC<FooterProps> = ({
           <div className="lg:col-span-4 space-y-6">
             <div className="space-y-3.5">
               <h3 className="text-sm font-bold text-white">Get In Touch</h3>
-              <ul className="space-y-3 text-sm text-slate-400">
-                <li className="flex items-center gap-2.5">
-                  <Phone className="w-4 h-4 text-indigo-400 shrink-0" />
-                  <a
-                    href={buildWhatsAppUrl()}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-slate-200 hover:text-white font-medium transition-colors"
-                  >
-                    {COMPANY_INFO.whatsappDisplay} (WhatsApp)
-                  </a>
+              <ul className="space-y-3.5 text-sm text-slate-400">
+                {/* Anis Contact */}
+                <li className="space-y-1">
+                  <div className="text-xs text-slate-400 font-semibold flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#6A35FF]" />
+                    <span>Founder ({COMPANY_INFO.founder}):</span>
+                  </div>
+                  <div className="flex items-center gap-3 pl-3">
+                    <a
+                      href={buildWhatsAppUrl()}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-slate-200 hover:text-[#38BDF8] font-mono text-xs transition-colors flex items-center gap-1"
+                    >
+                      <MessageCircle className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>{COMPANY_INFO.founderWhatsappDisplay}</span>
+                    </a>
+                    <span className="text-slate-600">·</span>
+                    <a
+                      href={buildPhoneCallUrl(COMPANY_INFO.founderPhone)}
+                      className="text-slate-400 hover:text-white text-xs transition-colors"
+                    >
+                      Call
+                    </a>
+                  </div>
                 </li>
-                <li className="flex items-center gap-2.5">
+
+                {/* Awais Contact */}
+                <li className="space-y-1">
+                  <div className="text-xs text-slate-400 font-semibold flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#38BDF8]" />
+                    <span>Representative ({COMPANY_INFO.representative}):</span>
+                  </div>
+                  <div className="flex items-center gap-3 pl-3">
+                    <a
+                      href={buildAwaisWhatsAppUrl()}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-slate-200 hover:text-[#38BDF8] font-mono text-xs transition-colors flex items-center gap-1"
+                    >
+                      <MessageCircle className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>{COMPANY_INFO.representativeWhatsappDisplay}</span>
+                    </a>
+                    <span className="text-slate-600">·</span>
+                    <a
+                      href={buildPhoneCallUrl(COMPANY_INFO.representativePhone)}
+                      className="text-slate-400 hover:text-white text-xs transition-colors"
+                    >
+                      Call
+                    </a>
+                  </div>
+                </li>
+
+                <li className="flex items-center gap-2.5 pt-1">
                   <Mail className="w-4 h-4 text-indigo-400 shrink-0" />
                   <a
                     href={buildMailtoUrl()}
@@ -204,8 +247,7 @@ export const Footer: React.FC<FooterProps> = ({
                 <li className="flex items-start gap-2.5">
                   <MapPin className="w-4 h-4 text-indigo-400 mt-0.5 shrink-0" />
                   <span className="text-slate-300">
-                    {COMPANY_INFO.location} · Founder: {COMPANY_INFO.founder} ·
-                    Rep: {COMPANY_INFO.representative}
+                    {COMPANY_INFO.location} · Serving Pakistan, US &amp; Global Clients
                   </span>
                 </li>
               </ul>

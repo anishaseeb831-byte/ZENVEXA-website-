@@ -9,14 +9,27 @@ import firebaseConfig from '../../firebase-applet-config.json';
 
 const app = initializeApp(firebaseConfig);
 
+export const FIREBASE_PROJECT_ID = firebaseConfig.projectId;
+export const FIRESTORE_DATABASE_ID =
+  (firebaseConfig as Record<string, any>).firestoreDatabaseId ||
+  'ai-studio-zenvexadigitalag-e4f0e9e2-74cb-4701-ab27-d194a4c4a291';
+export const BOOTSTRAPPED_ADMIN_EMAIL = 'zenvexahub@gmail.com';
+
 /* CRITICAL: Pass firestoreDatabaseId to connect to the provisioned Enterprise database */
-export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+export const db = getFirestore(app, FIRESTORE_DATABASE_ID);
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
-
-export const FIREBASE_PROJECT_ID = firebaseConfig.projectId;
-export const FIRESTORE_DATABASE_ID = firebaseConfig.firestoreDatabaseId;
-export const BOOTSTRAPPED_ADMIN_EMAIL = 'zenvexahub@gmail.com';
+googleProvider.setCustomParameters({
+  prompt: 'select_account',
+});
+// Google Workspace Scopes (Google Slides & Gmail)
+googleProvider.addScope('https://www.googleapis.com/auth/presentations');
+googleProvider.addScope('https://www.googleapis.com/auth/presentations.readonly');
+googleProvider.addScope('https://www.googleapis.com/auth/drive.readonly');
+googleProvider.addScope('https://www.googleapis.com/auth/drive.file');
+googleProvider.addScope('https://www.googleapis.com/auth/gmail.readonly');
+googleProvider.addScope('https://www.googleapis.com/auth/gmail.send');
+googleProvider.addScope('https://www.googleapis.com/auth/gmail.compose');
 
 export enum OperationType {
   CREATE = 'create',

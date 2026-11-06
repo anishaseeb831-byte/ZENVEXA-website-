@@ -14,6 +14,10 @@
     />
     <meta name="author" content="ZENVEXA Digital Agency" />
     <meta name="robots" content="index, follow" />
+    <meta
+      name="google-site-verification"
+      content="N95eZddSINNjQxr6JHXIfb_y2p-B4Uxhef5JILzEQeBU"
+    />
 
     <!-- Favicon & Brand Icon -->
     <link
@@ -76,11 +80,18 @@
         "logo": "/assets/aistudio/DFDE557A-BA98-44FF-BFF9-FC89A8D5B1C0_106ec586.png",
         "image": "/assets/aistudio/DFDE557A-BA98-44FF-BFF9-FC89A8D5B1C0_106ec586.png",
         "email": "zenvexahub@gmail.com",
-        "telephone": "+92-343-6481298",
+        "telephone": ["+92-343-6481298", "+92-313-3651635"],
         "founder": {
           "@type": "Person",
           "name": "Anis"
         },
+        "employee": [
+          {
+            "@type": "Person",
+            "name": "Awais",
+            "telephone": "+92-313-3651635"
+          }
+        ],
         "address": {
           "@type": "PostalAddress",
           "addressCountry": "PK"
@@ -88,14 +99,27 @@
         "areaServed": ["PK", "US", "Worldwide"],
         "sameAs": [
           "https://wa.me/923436481298",
+          "https://wa.me/923133651635",
           "https://www.instagram.com/zenvexahub?srtk=MWtsNGtrdHM2aGpwNw%3D%3D&utm_source=qr",
           "https://www.facebook.com/share/1E41z5AwGd/?mibextid=wwXIfr"
         ],
         "priceRange": "$49 - $199+"
       }
     </script>
+    <script>
+      (function() {
+        try {
+          var saved = localStorage.getItem('zenvexa-theme');
+          if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
-  <body class="bg-white text-slate-900 antialiased selection:bg-blue-600 selection:text-white">
+  <body class="bg-white dark:bg-[#080B14] text-slate-900 dark:text-slate-100 antialiased selection:bg-blue-600 selection:text-white transition-colors duration-200">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

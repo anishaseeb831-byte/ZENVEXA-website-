@@ -17,6 +17,7 @@ export type RoutePath =
   | '/blog'
   | '/contact'
   | '/portal'
+  | '/workspace'
   | (string & {});
 
 export interface NavItem {
@@ -81,7 +82,17 @@ export const COMPANY_INFO = {
   shortName: 'ZENVEXA',
   tagline: 'We Build. We Market. We Scale.',
   founder: 'Anis',
+  founderTitle: 'Founder & Strategic Director',
+  founderPhone: '03436481298',
+  founderPhoneInternational: '+92 343 6481298',
+  founderWhatsappDisplay: '03436481298',
+  founderWhatsappBaseUrl: 'https://wa.me/923436481298',
   representative: 'Awais',
+  representativeTitle: 'Co-Founder & Client Operations',
+  representativePhone: '03133651635',
+  representativePhoneInternational: '+92 313 3651635',
+  representativeWhatsappDisplay: '03133651635',
+  representativeWhatsappBaseUrl: 'https://wa.me/923133651635',
   location: 'Pakistan',
   targetMarkets: 'Pakistan · United States · International Markets',
   description:
@@ -98,11 +109,27 @@ export const COMPANY_INFO = {
   facebookUrl: 'https://www.facebook.com/share/1E41z5AwGd/?mibextid=wwXIfr',
 } as const;
 
-export function buildWhatsAppUrl(customMessage?: string): string {
-  const defaultMsg =
-    'Hello ZENVEXA Digital Agency, I would like to request a free quote regarding digital growth for my business.';
+export function buildWhatsAppUrl(
+  customMessage?: string,
+  recipient: 'anis' | 'awais' = 'anis'
+): string {
+  const recipientName = recipient === 'awais' ? 'Awais' : 'Anis';
+  const defaultMsg = `Hello ${recipientName} (ZENVEXA Digital Agency), I would like to consult on digital growth for my business.`;
   const text = encodeURIComponent(customMessage || defaultMsg);
-  return `${COMPANY_INFO.whatsappBaseUrl}?text=${text}`;
+  const baseUrl =
+    recipient === 'awais'
+      ? COMPANY_INFO.representativeWhatsappBaseUrl
+      : COMPANY_INFO.founderWhatsappBaseUrl;
+  return `${baseUrl}?text=${text}`;
+}
+
+export function buildAwaisWhatsAppUrl(customMessage?: string): string {
+  return buildWhatsAppUrl(customMessage, 'awais');
+}
+
+export function buildPhoneCallUrl(phoneNumber: string): string {
+  const digits = phoneNumber.replace(/[^0-9+]/g, '');
+  return `tel:${digits}`;
 }
 
 export function buildMailtoUrl(subject?: string, body?: string): string {
@@ -136,6 +163,7 @@ export const FOOTER_QUICK_LINKS: NavItem[] = [
   { label: 'Blog', path: '/blog' },
   { label: 'Contact', path: '/contact' },
   { label: 'Client Portal', path: '/portal' },
+  { label: 'Google Workspace', path: '/workspace' },
 ];
 
 export const ROUTE_SEO: Record<
@@ -187,6 +215,11 @@ export const ROUTE_SEO: Record<
     title: 'Client & Agency Portal | ZENVEXA Digital Agency',
     description:
       'Sign in to track your ZENVEXA project inquiries, manage agency portfolio items, and moderate verified client reviews.',
+  },
+  '/workspace': {
+    title: 'Google Workspace Hub (Slides & Gmail) | ZENVEXA Digital Agency',
+    description:
+      'Manage client growth presentations in Google Slides and communicate directly via Gmail integrated into ZENVEXA.',
   },
   '/services/social-media-management': {
     title: 'Social Media Management | ZENVEXA Digital Agency',
@@ -324,14 +357,20 @@ export const TEAM_STRUCTURES: TeamStructureItem[] = [
 export const LEADERSHIP_PROFILES = [
   {
     name: 'Anis',
-    role: 'Founder',
+    role: 'Founder & Strategic Director',
+    phoneDisplay: '03436481298',
+    phoneInternational: '+92 343 6481298',
+    whatsappUrl: 'https://wa.me/923436481298',
     organization: 'ZENVEXA Digital Agency',
     focus: 'Agency Vision · Strategic Direction · Quality Standards',
     bio: 'Leads ZENVEXA’s overarching vision, service architecture, and commitment to delivering structured, reliable digital growth solutions for domestic and international businesses.',
   },
   {
     name: 'Awais',
-    role: 'Agency Representative',
+    role: 'Co-Founder & Client Operations',
+    phoneDisplay: '03133651635',
+    phoneInternational: '+92 313 3651635',
+    whatsappUrl: 'https://wa.me/923133651635',
     organization: 'ZENVEXA Digital Agency',
     focus: 'Client Partnerships · Consultation · Project Coordination',
     bio: 'Serves as primary agency representative for prospective and active partners, guiding consultations, scoping custom plans, and ensuring clear, transparent communication at every stage.',

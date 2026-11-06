@@ -24,7 +24,9 @@ import { PricingPage } from './components/PricingPage';
 import { BlogPage } from './components/BlogPage';
 import { BlogPostPage } from './components/BlogPostPage';
 import { NotFoundPage } from './components/NotFoundPage';
+import { GoogleWorkspaceHub } from './components/GoogleWorkspaceHub';
 import { BackToTop } from './components/BackToTop';
+import { LoadingScreen } from './components/LoadingScreen';
 import { RoutePath, ROUTE_SEO } from './data/agencyData';
 import { getServiceBySlug } from './data/servicesDetailedData';
 import { getBlogArticleBySlug } from './data/blogData';
@@ -42,6 +44,7 @@ export default function App() {
     normalizePath(window.location.pathname)
   );
   const [inquiryPreset, setInquiryPreset] = useState<InquiryPreset | null>(null);
+  const [showLoading, setShowLoading] = useState(true);
 
   // Sync browser back/forward navigation
   useEffect(() => {
@@ -296,31 +299,48 @@ export default function App() {
       return <PortalSection onNavigate={(path) => navigateTo(path)} />;
     }
 
-    // 11. Custom 404 Fallback
+    // 11. Google Workspace Suite (Slides & Gmail)
+    if (currentPath === '/workspace') {
+      return (
+        <div className="py-12 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <GoogleWorkspaceHub />
+        </div>
+      );
+    }
+
+    // 12. Custom 404 Fallback
     return <NotFoundPage onNavigate={(path) => navigateTo(path)} />;
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-white text-[#0B0F19]">
-      <Navbar
-        currentPath={currentPath as RoutePath}
-        onNavigate={(path) => navigateTo(path)}
-        onGetQuote={handleGetQuoteAction}
-      />
+    <>
+      {showLoading && (
+        <LoadingScreen
+          onFinish={() => setShowLoading(false)}
+          minDurationMs={1700}
+        />
+      )}
+      <div className="min-h-screen flex flex-col bg-white dark:bg-[#080B14] text-[#0B0F19] dark:text-slate-100 transition-colors duration-200">
+        <Navbar
+          currentPath={currentPath as RoutePath}
+          onNavigate={(path) => navigateTo(path)}
+          onGetQuote={handleGetQuoteAction}
+        />
 
-      <main className="flex-1">{renderRouteContent()}</main>
+        <main className="flex-1">{renderRouteContent()}</main>
 
-      <Footer
-        onNavigate={(path) => navigateTo(path)}
-        onSelectService={(serviceTitle) =>
-          openInquiryWithPreset(
-            serviceTitle,
-            `Hello ZENVEXA Team, I would like to inquire about ${serviceTitle} for my business.`
-          )
-        }
-      />
+        <Footer
+          onNavigate={(path) => navigateTo(path)}
+          onSelectService={(serviceTitle) =>
+            openInquiryWithPreset(
+              serviceTitle,
+              `Hello ZENVEXA Team, I would like to inquire about ${serviceTitle} for my business.`
+            )
+          }
+        />
 
-      <BackToTop />
-    </div>
+        <BackToTop />
+      </div>
+    </>
   );
 }
