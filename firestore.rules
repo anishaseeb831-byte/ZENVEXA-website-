@@ -32,7 +32,10 @@ service cloud.firestore {
 
     // Zero-lookup bootstrapped admin check (safe inside `allow list` with zero O(n) reads)
     function isAdminEmail() {
-      return isVerifiedUser() && request.auth.token.email == 'zenvexahub@gmail.com';
+      return isVerifiedUser() && (
+        request.auth.token.email == 'zenvexahub@gmail.com' ||
+        request.auth.token.email == 'anisusa032@gmail.com'
+      );
     }
 
     // Checks if the user is the single registered administrator who claimed the sole admin slot

@@ -147,7 +147,16 @@ export const GoogleWorkspaceHub: React.FC = () => {
 
   // Handle deck creation execution with explicit user confirmation
   const handleExecuteDeckCreation = async () => {
-    if (!accessToken) return;
+    let token = accessToken;
+    if (!token) {
+      token = await connectWorkspace();
+      if (!token) {
+        setSlidesError('Google Workspace access token is required to create a presentation. Please authorize above.');
+        setShowDeckConfirmDialog(false);
+        return;
+      }
+    }
+
     setIsSubmittingDeck(true);
     setSlidesError(null);
     try {
@@ -157,7 +166,7 @@ export const GoogleWorkspaceHub: React.FC = () => {
           serviceName: deckService,
           primaryGoal: deckGoal.trim() || 'Digital Growth',
         },
-        accessToken
+        token
       );
       setPresentations((prev) => [newDeck, ...prev]);
       setDeckCreationSuccess(newDeck);
@@ -165,7 +174,14 @@ export const GoogleWorkspaceHub: React.FC = () => {
       setIsCreatingDeck(false);
       setDeckClientName('');
     } catch (err: any) {
-      setSlidesError(err.message || 'Failed to generate presentation.');
+      const msg = err?.message || String(err);
+      if (msg.includes('403') || msg.includes('insufficient') || msg.includes('scope')) {
+        setSlidesError(
+          'Google Slides returned a 403 insufficient scopes error. Your session token lacks the required presentation scope. Please click "Authorize Google Workspace" above to grant Google Slides access.'
+        );
+      } else {
+        setSlidesError(msg || 'Failed to generate presentation.');
+      }
       setShowDeckConfirmDialog(false);
     } finally {
       setIsSubmittingDeck(false);

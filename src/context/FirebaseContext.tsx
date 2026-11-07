@@ -17,6 +17,7 @@ import {
   googleAuthProvider,
   workspaceGoogleProvider,
   BOOTSTRAPPED_ADMIN_EMAIL,
+  isAuthorizedAdminEmail,
 } from '../lib/firebase';
 
 interface FirebaseContextValue {
@@ -44,19 +45,33 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isAdmin, setIsAdmin] = useState(false);
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        return sessionStorage.getItem('zenvexa_oauth_access_token');
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  });
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       if (!currentUser) {
         setAccessToken(null);
+        try {
+          sessionStorage.removeItem('zenvexa_oauth_access_token');
+        } catch {
+          // ignore
+        }
       }
       setIsAdmin(
         Boolean(
           currentUser &&
             currentUser.emailVerified &&
-            currentUser.email === BOOTSTRAPPED_ADMIN_EMAIL
+            isAuthorizedAdminEmail(currentUser.email)
         )
       );
       setAuthReady(true);
@@ -122,6 +137,11 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({
       const credential = GoogleAuthProvider.credentialFromResult(result);
       if (credential?.accessToken) {
         setAccessToken(credential.accessToken);
+        try {
+          sessionStorage.setItem('zenvexa_oauth_access_token', credential.accessToken);
+        } catch {
+          // ignore
+        }
       }
       return result.user;
     } catch (err) {
@@ -144,6 +164,11 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({
       const credential = GoogleAuthProvider.credentialFromResult(result);
       if (credential?.accessToken) {
         setAccessToken(credential.accessToken);
+        try {
+          sessionStorage.setItem('zenvexa_oauth_access_token', credential.accessToken);
+        } catch {
+          // ignore
+        }
         return credential.accessToken;
       }
       return null;
@@ -161,6 +186,11 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({
   const signOutUser = useCallback(async (): Promise<void> => {
     setAuthError(null);
     setAccessToken(null);
+    try {
+      sessionStorage.removeItem('zenvexa_oauth_access_token');
+    } catch {
+      // ignore
+    }
     await signOut(auth);
   }, []);
 

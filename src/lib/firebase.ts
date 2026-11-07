@@ -14,6 +14,10 @@ export const FIRESTORE_DATABASE_ID =
   (firebaseConfig as Record<string, any>).firestoreDatabaseId ||
   'ai-studio-zenvexadigitalag-e4f0e9e2-74cb-4701-ab27-d194a4c4a291';
 export const BOOTSTRAPPED_ADMIN_EMAIL = 'zenvexahub@gmail.com';
+export const REGISTERED_SOLE_ADMIN_EMAIL = 'anisusa032@gmail.com';
+export const AUTHORIZED_ADMIN_EMAILS = [BOOTSTRAPPED_ADMIN_EMAIL, REGISTERED_SOLE_ADMIN_EMAIL];
+export const isAuthorizedAdminEmail = (email?: string | null): boolean =>
+  Boolean(email && AUTHORIZED_ADMIN_EMAILS.includes(email.toLowerCase()));
 
 /* CRITICAL: Pass firestoreDatabaseId to connect to the provisioned Enterprise database */
 export const db = getFirestore(app, FIRESTORE_DATABASE_ID);
@@ -29,6 +33,11 @@ export const googleAuthProvider = new GoogleAuthProvider();
 googleAuthProvider.setCustomParameters({
   prompt: 'select_account',
 });
+// Google Slides and Google Drive scopes for presentation generation and deck management
+googleAuthProvider.addScope('https://www.googleapis.com/auth/presentations');
+googleAuthProvider.addScope('https://www.googleapis.com/auth/presentations.readonly');
+googleAuthProvider.addScope('https://www.googleapis.com/auth/drive.readonly');
+googleAuthProvider.addScope('https://www.googleapis.com/auth/drive.file');
 
 /**
  * Dedicated Google Workspace Provider for Google Slides & Gmail.
