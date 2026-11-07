@@ -14,7 +14,8 @@ import {
 } from 'firebase/auth';
 import {
   auth,
-  googleProvider,
+  googleAuthProvider,
+  workspaceGoogleProvider,
   BOOTSTRAPPED_ADMIN_EMAIL,
 } from '../lib/firebase';
 
@@ -22,6 +23,7 @@ interface FirebaseContextValue {
   user: User | null;
   authReady: boolean;
   isAdmin: boolean;
+  isSigningIn: boolean;
   authError: string | null;
   accessToken: string | null;
   signInWithGoogle: () => Promise<User | null>;
@@ -40,6 +42,7 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({
   const [user, setUser] = useState<User | null>(null);
   const [authReady, setAuthReady] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isSigningIn, setIsSigningIn] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
 
@@ -62,45 +65,82 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({
     return () => unsubscribe();
   }, []);
 
+  const parseAuthErrorMessage = (err: unknown, isWorkspace = false): string | null => {
+    const raw = err instanceof Error ? err.message : String(err);
+
+    // Normal cancellation by user dismissal
+    if (raw.includes('auth/popup-closed-by-user')) {
+      return null;
+    }
+
+    if (raw.includes('auth/popup-blocked')) {
+      return 'The sign-in popup was blocked by your browser. Please allow popups for this site or tap the button again.';
+    }
+
+    if (raw.includes('auth/cancelled-popup-request')) {
+      return 'A sign-in request is already in progress. Please complete or close the existing popup.';
+    }
+
+    if (raw.includes('auth/operation-not-allowed')) {
+      return 'Google Sign-In is not enabled in Firebase Authentication. In the Firebase Console, go to Authentication > Sign-in method, click Google, and toggle it to Enabled.';
+    }
+
+    if (raw.includes('auth/unauthorized-domain')) {
+      const currentHost = typeof window !== 'undefined' ? window.location.hostname : 'your domain';
+      return `The domain "${currentHost}" is not authorized for authentication. Please add "${currentHost}" to Authorized Domains in Firebase Console > Authentication > Settings.`;
+    }
+
+    if (raw.includes('auth/network-request-failed')) {
+      return 'Network connection failed. Please check your internet connection and try again.';
+    }
+
+    if (raw.includes('403') || raw.includes('access_denied') || raw.includes('verification process')) {
+      if (isWorkspace) {
+        return 'Google Workspace authorization was blocked (Error 403). Because Google Slides & Gmail are restricted APIs, while your project is in Testing Mode, your Google account email must be added to "Test users" in Google Cloud Console > APIs & Services > OAuth consent screen.';
+      }
+      return 'Google sign-in access was blocked (Error 403). If your Google Cloud OAuth Consent Screen is in Testing Mode, please ensure your email is added under "Test users" in Google Cloud Console, or publish the consent screen.';
+    }
+
+    if (
+      raw.includes('missing initial state') ||
+      raw.includes('storage-partitioned') ||
+      raw.includes('sessionStorage')
+    ) {
+      return 'Third-party storage/cookie restrictions in this browser prevented the login session from completing. Please open the link directly in your browser or enable third-party cookies.';
+    }
+
+    return `Authentication could not be completed: ${raw.replace(/Firebase:\s*/, '')}`;
+  };
+
   const signInWithGoogle = useCallback(async (): Promise<User | null> => {
     setAuthError(null);
+    setIsSigningIn(true);
     try {
-      const result = await signInWithPopup(auth, googleProvider);
+      // Standard authentication: only requests standard openid/profile/email scopes.
+      // This ensures 100% normal sign-in for clients and users without triggering Google's restricted scope 403 block!
+      const result = await signInWithPopup(auth, googleAuthProvider);
       const credential = GoogleAuthProvider.credentialFromResult(result);
       if (credential?.accessToken) {
         setAccessToken(credential.accessToken);
       }
       return result.user;
     } catch (err) {
-      const raw = err instanceof Error ? err.message : String(err);
-      if (raw.includes('auth/popup-closed-by-user')) {
-        return null;
-      }
-      if (
-        raw.includes('missing initial state') ||
-        raw.includes('storage-partitioned') ||
-        raw.includes('sessionStorage')
-      ) {
-        setAuthError(
-          'Mobile Safari in this preview container is operating with partitioned storage. You can send your inquiry directly via WhatsApp or Email without signing in, or open the link directly in your browser.'
-        );
-      } else if (raw.includes('auth/popup-blocked')) {
-        setAuthError(
-          'The login popup was blocked by your browser. Please allow popups for this site or send your inquiry directly via WhatsApp or Email.'
-        );
-      } else {
-        setAuthError(
-          'Google authentication could not complete in this preview session. You can submit directly via WhatsApp or Email below.'
-        );
+      const friendlyMessage = parseAuthErrorMessage(err, false);
+      if (friendlyMessage) {
+        setAuthError(friendlyMessage);
       }
       return null;
+    } finally {
+      setIsSigningIn(false);
     }
   }, []);
 
   const connectWorkspace = useCallback(async (): Promise<string | null> => {
     setAuthError(null);
+    setIsSigningIn(true);
     try {
-      const result = await signInWithPopup(auth, googleProvider);
+      // Dedicated workspace authentication: requests Slides and Gmail scopes incrementally
+      const result = await signInWithPopup(auth, workspaceGoogleProvider);
       const credential = GoogleAuthProvider.credentialFromResult(result);
       if (credential?.accessToken) {
         setAccessToken(credential.accessToken);
@@ -108,12 +148,13 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({
       }
       return null;
     } catch (err) {
-      const raw = err instanceof Error ? err.message : String(err);
-      if (raw.includes('auth/popup-closed-by-user')) {
-        return null;
+      const friendlyMessage = parseAuthErrorMessage(err, true);
+      if (friendlyMessage) {
+        setAuthError(friendlyMessage);
       }
-      setAuthError('Could not grant Google Workspace permissions. Please try again.');
       return null;
+    } finally {
+      setIsSigningIn(false);
     }
   }, []);
 
@@ -131,6 +172,7 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({
         user,
         authReady,
         isAdmin,
+        isSigningIn,
         authError,
         accessToken,
         signInWithGoogle,

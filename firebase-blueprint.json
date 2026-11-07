@@ -1,5 +1,43 @@
 {
   "entities": {
+    "AdminSlot": {
+      "title": "AdminSlot",
+      "description": "Singleton configuration document enforcing a single administrator account for the agency.",
+      "type": "object",
+      "properties": {
+        "claimed": {
+          "type": "boolean",
+          "description": "Indicates whether the single admin seat has been claimed."
+        },
+        "adminUid": {
+          "type": "string",
+          "description": "Firebase Auth UID of the sole administrator.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "adminEmail": {
+          "type": "string",
+          "format": "email",
+          "description": "Email address of the sole administrator.",
+          "minLength": 3,
+          "maxLength": 160,
+          "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"
+        },
+        "label": {
+          "type": "string",
+          "description": "Administrator title or designation.",
+          "minLength": 2,
+          "maxLength": 80
+        },
+        "claimedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the single admin slot was claimed."
+        }
+      },
+      "required": ["claimed", "adminUid", "adminEmail", "label", "claimedAt"]
+    },
     "AdminRecord": {
       "title": "AdminRecord",
       "description": "Trusted agency administrator lookup document keyed by Firebase Auth UID.",
@@ -272,6 +310,10 @@
     }
   },
   "firestore": {
+    "/system/adminSlot": {
+      "schema": { "$ref": "#/entities/AdminSlot" },
+      "description": "Singleton admin slot enforcing that exactly one administrator account can be created."
+    },
     "/admins/{adminId}": {
       "schema": { "$ref": "#/entities/AdminRecord" },
       "description": "Trusted administrator registry keyed by UID."

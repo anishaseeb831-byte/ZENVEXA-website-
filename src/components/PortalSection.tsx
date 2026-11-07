@@ -29,6 +29,7 @@ import {
   EyeOff,
   LayoutDashboard,
   Presentation,
+  X,
 } from 'lucide-react';
 import { useFirebase } from '../context/FirebaseContext';
 import { ClientDashboardView } from './ClientDashboardView';
@@ -127,8 +128,16 @@ interface PortalSectionProps {
 }
 
 export const PortalSection: React.FC<PortalSectionProps> = ({ onNavigate }) => {
-  const { user, authReady, isAdmin, authError, signInWithGoogle, signOutUser } =
-    useFirebase();
+  const {
+    user,
+    authReady,
+    isAdmin,
+    isSigningIn,
+    authError,
+    signInWithGoogle,
+    signOutUser,
+    clearAuthError,
+  } = useFirebase();
 
   const [activeAdminTab, setActiveAdminTab] = useState<
     'inquiries' | 'portfolio' | 'reviews' | 'client_preview' | 'workspace'
@@ -538,19 +547,43 @@ export const PortalSection: React.FC<PortalSectionProps> = ({ onNavigate }) => {
               </div>
 
               {authError && (
-                <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-xs text-red-700">
-                  {authError}
+                <div className="p-3.5 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 text-xs text-red-700 dark:text-red-300 flex items-start justify-between gap-3 text-left">
+                  <div className="space-y-1">
+                    <div className="font-semibold flex items-center gap-1.5">
+                      <AlertCircle className="w-3.5 h-3.5 text-red-600 shrink-0" />
+                      <span>Authentication Notice</span>
+                    </div>
+                    <p className="leading-relaxed">{authError}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={clearAuthError}
+                    className="text-red-500 hover:text-red-700 dark:hover:text-red-300 p-1 cursor-pointer shrink-0"
+                    title="Dismiss"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               )}
 
               <div className="pt-2">
                 <button
                   type="button"
+                  disabled={isSigningIn}
                   onClick={signInWithGoogle}
-                  className="inline-flex items-center justify-center gap-2.5 px-7 py-3.5 text-sm sm:text-base font-semibold text-white bg-brand-gradient bg-brand-gradient-hover rounded-xl shadow-md shadow-indigo-500/20 transition-all cursor-pointer"
+                  className="inline-flex items-center justify-center gap-2.5 px-7 py-3.5 text-sm sm:text-base font-semibold text-white bg-brand-gradient bg-brand-gradient-hover rounded-xl shadow-md shadow-indigo-500/20 transition-all cursor-pointer disabled:opacity-60"
                 >
-                  <LogIn className="w-4 h-4" />
-                  <span>Sign In with Google</span>
+                  {isSigningIn ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Opening Google Sign-In...</span>
+                    </>
+                  ) : (
+                    <>
+                      <LogIn className="w-4 h-4" />
+                      <span>Sign In with Google</span>
+                    </>
+                  )}
                 </button>
               </div>
             </div>

@@ -18,18 +18,38 @@ export const BOOTSTRAPPED_ADMIN_EMAIL = 'zenvexahub@gmail.com';
 /* CRITICAL: Pass firestoreDatabaseId to connect to the provisioned Enterprise database */
 export const db = getFirestore(app, FIRESTORE_DATABASE_ID);
 export const auth = getAuth(app);
-export const googleProvider = new GoogleAuthProvider();
-googleProvider.setCustomParameters({
+
+/**
+ * Standard Google Auth Provider for general website authentication
+ * (Client Portal, Inquiry submission, Reviews, and Account management).
+ * Requests ONLY basic profile and email (OpenID).
+ * Does NOT request restricted sensitive scopes, preventing Google's 403 access_denied verification blocker.
+ */
+export const googleAuthProvider = new GoogleAuthProvider();
+googleAuthProvider.setCustomParameters({
   prompt: 'select_account',
 });
-// Google Workspace Scopes (Google Slides & Gmail)
-googleProvider.addScope('https://www.googleapis.com/auth/presentations');
-googleProvider.addScope('https://www.googleapis.com/auth/presentations.readonly');
-googleProvider.addScope('https://www.googleapis.com/auth/drive.readonly');
-googleProvider.addScope('https://www.googleapis.com/auth/drive.file');
-googleProvider.addScope('https://www.googleapis.com/auth/gmail.readonly');
-googleProvider.addScope('https://www.googleapis.com/auth/gmail.send');
-googleProvider.addScope('https://www.googleapis.com/auth/gmail.compose');
+
+/**
+ * Dedicated Google Workspace Provider for Google Slides & Gmail.
+ * Used exclusively inside GoogleWorkspaceHub when explicitly authorized by an admin/tester.
+ */
+export const workspaceGoogleProvider = new GoogleAuthProvider();
+workspaceGoogleProvider.setCustomParameters({
+  prompt: 'select_account',
+});
+workspaceGoogleProvider.addScope('https://www.googleapis.com/auth/presentations');
+workspaceGoogleProvider.addScope('https://www.googleapis.com/auth/presentations.readonly');
+workspaceGoogleProvider.addScope('https://www.googleapis.com/auth/drive.readonly');
+workspaceGoogleProvider.addScope('https://www.googleapis.com/auth/drive.file');
+workspaceGoogleProvider.addScope('https://www.googleapis.com/auth/gmail.readonly');
+workspaceGoogleProvider.addScope('https://www.googleapis.com/auth/gmail.send');
+workspaceGoogleProvider.addScope('https://www.googleapis.com/auth/gmail.compose');
+
+/**
+ * Default provider alias for backwards compatibility
+ */
+export const googleProvider = googleAuthProvider;
 
 export enum OperationType {
   CREATE = 'create',

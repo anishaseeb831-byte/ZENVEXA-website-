@@ -35,9 +35,16 @@ service cloud.firestore {
       return isVerifiedUser() && request.auth.token.email == 'zenvexahub@gmail.com';
     }
 
-    // Full admin check for single-document operations (bootstrapped email OR trusted DB record)
+    // Checks if the user is the single registered administrator who claimed the sole admin slot
+    function isSoleAdmin() {
+      return isVerifiedUser() &&
+        exists(/databases/$(database)/documents/system/adminSlot) &&
+        get(/databases/$(database)/documents/system/adminSlot).data.adminUid == request.auth.uid;
+    }
+
+    // Full admin check for single-document operations (bootstrapped email OR sole admin OR trusted DB record)
     function isAdmin() {
-      return isAdminEmail() || (
+      return isAdminEmail() || isSoleAdmin() || (
         isVerifiedUser() &&
         exists(/databases/$(database)/documents/admins/$(request.auth.uid))
       );
@@ -46,6 +53,18 @@ service cloud.firestore {
     // =========================================================================
     // Validation Blueprints (Synchronized verbatim with firebase-blueprint.json)
     // =========================================================================
+    function isValidAdminSlot(data) {
+      return data.keys().hasAll(['claimed', 'adminUid', 'adminEmail', 'label', 'claimedAt']) &&
+        data.keys().hasOnly(['claimed', 'adminUid', 'adminEmail', 'label', 'claimedAt']) &&
+        data.claimed == true &&
+        data.adminUid is string && data.adminUid.size() >= 1 && data.adminUid.size() <= 128 &&
+        data.adminUid.matches('^[a-zA-Z0-9_\\-]+$') &&
+        data.adminEmail is string && data.adminEmail.size() >= 3 && data.adminEmail.size() <= 160 &&
+        data.adminEmail.matches('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$') &&
+        data.label is string && data.label.size() >= 2 && data.label.size() <= 80 &&
+        data.claimedAt is timestamp;
+    }
+
     function isValidAdminRecord(data) {
       return data.keys().hasAll(['uid', 'label', 'createdAt']) &&
         data.keys().hasOnly(['uid', 'label', 'createdAt']) &&
@@ -185,6 +204,25 @@ service cloud.firestore {
     }
 
     // =========================================================================
+    // Singleton: /system/adminSlot (Enforces Exactly 1 Sole Admin Account)
+    // =========================================================================
+    match /system/adminSlot {
+      allow get: if true; // Publicly readable so UI can verify if single slot is open or claimed
+      allow list: if false;
+
+      // Single Slot: can ONLY be created once if the document does not exist yet!
+      allow create: if isVerifiedUser() &&
+        isValidAdminSlot(incoming()) &&
+        incoming().adminUid == request.auth.uid &&
+        incoming().adminEmail == request.auth.token.email &&
+        incoming().claimedAt == request.time &&
+        !exists(/databases/$(database)/documents/system/adminSlot);
+
+      // Once claimed, the slot is permanently immutable and cannot be deleted or re-claimed
+      allow update, delete: if false;
+    }
+
+    // =========================================================================
     // Collection 1: /admins/{adminId}
     // =========================================================================
     match /admins/{adminId} {
@@ -196,7 +234,7 @@ service cloud.firestore {
         isValidAdminRecord(incoming()) &&
         incoming().uid == adminId &&
         incoming().createdAt == request.time &&
-        isAdmin();
+        (isAdmin() || (incoming().uid == request.auth.uid && isSoleAdmin()));
 
       allow update: if isVerifiedUser() &&
         isValidId(adminId) &&

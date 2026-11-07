@@ -78,7 +78,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
   onNavigate,
 }) => {
   const HeadingTag = isStandalonePage ? 'h1' : 'h2';
-  const { user, isAdmin, signInWithGoogle } = useFirebase();
+  const { user, isAdmin, signInWithGoogle, authError } = useFirebase();
 
   const whatsappTriggerRef = useRef<HTMLAnchorElement>(null);
   const emailTriggerRef = useRef<HTMLAnchorElement>(null);
@@ -228,7 +228,8 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
       if (!activeUser) {
         setSubmissionStatus('cloud-error');
         setErrorMessage(
-          'Google sign-in was cancelled. Sign in with Google to save and track your inquiry online, or send directly via WhatsApp or Email below.'
+          authError ||
+            'Google sign-in was cancelled. Sign in with Google to save and track your inquiry online, or send directly via WhatsApp or Email below.'
         );
         return;
       }

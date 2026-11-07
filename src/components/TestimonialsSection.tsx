@@ -51,7 +51,7 @@ interface TestimonialsSectionProps {
 export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
   onNavigate,
 }) => {
-  const { user, signInWithGoogle } = useFirebase();
+  const { user, signInWithGoogle, authError } = useFirebase();
 
   const [cloudReviews, setCloudReviews] = useState<TestimonialItem[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
@@ -177,6 +177,7 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
       if (!activeUser) {
         setFormError({
           message:
+            authError ||
             'Please sign in with Google to verify your identity before submitting a review.',
         });
         setSubmitting(false);

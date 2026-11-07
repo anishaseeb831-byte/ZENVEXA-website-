@@ -36,7 +36,8 @@ import {
 import { SERVICES_DATA, COMPANY_INFO } from '../data/agencyData';
 
 export const GoogleWorkspaceHub: React.FC = () => {
-  const { user, accessToken, connectWorkspace } = useFirebase();
+  const { user, accessToken, connectWorkspace, authError, clearAuthError, isSigningIn } =
+    useFirebase();
 
   // Active workspace tab
   const [activeTab, setActiveTab] = useState<'slides' | 'gmail'>('slides');
@@ -295,14 +296,44 @@ export const GoogleWorkspaceHub: React.FC = () => {
           <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-md mx-auto">
             Authorize access with your Google account to view and generate Google Slides presentations and manage client communications via Gmail.
           </p>
+          {authError && (
+            <div className="p-3.5 max-w-lg mx-auto rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 text-xs text-red-700 dark:text-red-300 flex items-start justify-between gap-3 text-left">
+              <div className="space-y-1">
+                <div className="font-semibold flex items-center gap-1.5">
+                  <AlertCircle className="w-3.5 h-3.5 text-red-600 shrink-0" />
+                  <span>Google Workspace Notice</span>
+                </div>
+                <p className="leading-relaxed">{authError}</p>
+              </div>
+              <button
+                type="button"
+                onClick={clearAuthError}
+                className="text-red-500 hover:text-red-700 dark:hover:text-red-300 p-1 cursor-pointer shrink-0"
+                title="Dismiss"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+
           <div className="pt-2">
             <button
               type="button"
+              disabled={isSigningIn}
               onClick={connectWorkspace}
-              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-brand-gradient hover:opacity-95 shadow-md shadow-indigo-500/20 cursor-pointer"
+              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-brand-gradient hover:opacity-95 shadow-md shadow-indigo-500/20 cursor-pointer disabled:opacity-60"
             >
-              <span>Authorize Google Workspace</span>
-              <ChevronRight className="w-4 h-4" />
+              {isSigningIn ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Authorizing...</span>
+                </>
+              ) : (
+                <>
+                  <span>Authorize Google Workspace</span>
+                  <ChevronRight className="w-4 h-4" />
+                </>
+              )}
             </button>
           </div>
         </div>

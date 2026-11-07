@@ -25,11 +25,13 @@ import { BlogPage } from './components/BlogPage';
 import { BlogPostPage } from './components/BlogPostPage';
 import { NotFoundPage } from './components/NotFoundPage';
 import { GoogleWorkspaceHub } from './components/GoogleWorkspaceHub';
+import { AdminBookingsPanel } from './components/AdminBookingsPanel';
 import { BackToTop } from './components/BackToTop';
 import { LoadingScreen } from './components/LoadingScreen';
 import { RoutePath, ROUTE_SEO } from './data/agencyData';
 import { getServiceBySlug } from './data/servicesDetailedData';
 import { getBlogArticleBySlug } from './data/blogData';
+import { applyRouteMeta } from './lib/seoMeta';
 
 function normalizePath(pathname: string): string {
   const cleaned =
@@ -55,52 +57,9 @@ export default function App() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  // Sync per-route SEO title and meta description dynamically
+  // Sync per-route SEO title, meta description, and specific Open Graph & Twitter tags dynamically
   useEffect(() => {
-    let title = 'ZENVEXA Digital Agency | Digital Marketing, Branding & Web Development';
-    let description =
-      'ZENVEXA Digital Agency helps businesses grow through social media management, Facebook and Instagram advertising, SEO, website development, branding, and complete digital marketing solutions.';
-
-    if (currentPath.startsWith('/services/')) {
-      const slug = currentPath.slice('/services/'.length);
-      const service = getServiceBySlug(slug);
-      if (service) {
-        title = `${service.title} | ZENVEXA Digital Agency`;
-        description = service.heroDescription;
-      } else {
-        title = 'Service Not Found | ZENVEXA Digital Agency';
-        description = 'The requested service page could not be found.';
-      }
-    } else if (currentPath.startsWith('/blog/')) {
-      const slug = currentPath.slice('/blog/'.length);
-      const article = getBlogArticleBySlug(slug);
-      if (article) {
-        title = `${article.title} | ZENVEXA Digital Agency Blog`;
-        description = article.excerpt;
-      } else {
-        title = 'Article Not Found | ZENVEXA Digital Agency Blog';
-        description = 'The requested blog article could not be found.';
-      }
-    } else if (ROUTE_SEO[currentPath as RoutePath]) {
-      const seo = ROUTE_SEO[currentPath as RoutePath];
-      title = seo.title;
-      description = seo.description;
-    }
-
-    document.title = title;
-
-    const updateMeta = (selector: string, content: string) => {
-      const el = document.querySelector(selector);
-      if (el) {
-        el.setAttribute('content', content);
-      }
-    };
-
-    updateMeta('meta[name="description"]', description);
-    updateMeta('meta[property="og:title"]', title);
-    updateMeta('meta[property="og:description"]', description);
-    updateMeta('meta[name="twitter:title"]', title);
-    updateMeta('meta[name="twitter:description"]', description);
+    applyRouteMeta(currentPath);
   }, [currentPath]);
 
   const navigateTo = useCallback(
@@ -308,7 +267,12 @@ export default function App() {
       );
     }
 
-    // 12. Custom 404 Fallback
+    // 12. Dedicated Admin Bookings & Consultations Panel (Accessible via Footer Link)
+    if (currentPath === '/admin') {
+      return <AdminBookingsPanel onNavigate={(path) => navigateTo(path)} />;
+    }
+
+    // 13. Custom 404 Fallback
     return <NotFoundPage onNavigate={(path) => navigateTo(path)} />;
   };
 

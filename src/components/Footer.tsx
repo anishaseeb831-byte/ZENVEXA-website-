@@ -5,6 +5,7 @@ import {
   MapPin,
   ArrowRight,
   MessageCircle,
+  ShieldCheck,
 } from 'lucide-react';
 import {
   COMPANY_INFO,
@@ -285,13 +286,26 @@ export const Footer: React.FC<FooterProps> = ({
           </div>
         </div>
 
-        {/* Bottom Copyright Bar */}
+        {/* Bottom Copyright Bar with Dedicated Admin Link */}
         <div className="mt-14 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <p>
             &copy; {new Date().getFullYear()} {COMPANY_INFO.name}. All rights
             reserved.
           </p>
-          <p className="text-slate-400">{COMPANY_INFO.tagline}</p>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-slate-400 hidden sm:inline">{COMPANY_INFO.tagline}</span>
+            <span className="text-slate-700 hidden sm:inline">·</span>
+            <a
+              href="/admin"
+              onClick={(e) => handleLinkClick(e, '/admin')}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 hover:border-indigo-400/40 transition-all font-semibold"
+              title="Single Slot Administrator Panel"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-[#6A35FF]" />
+              <span>Admin Sign-Up / Login</span>
+            </a>
+          </div>
         </div>
       </div>
     </footer>

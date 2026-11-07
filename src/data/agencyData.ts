@@ -18,6 +18,7 @@ export type RoutePath =
   | '/contact'
   | '/portal'
   | '/workspace'
+  | '/admin'
   | (string & {});
 
 export interface NavItem {
@@ -164,6 +165,7 @@ export const FOOTER_QUICK_LINKS: NavItem[] = [
   { label: 'Contact', path: '/contact' },
   { label: 'Client Portal', path: '/portal' },
   { label: 'Google Workspace', path: '/workspace' },
+  { label: 'Admin Sign-Up / Login', path: '/admin' },
 ];
 
 export const ROUTE_SEO: Record<
@@ -220,6 +222,11 @@ export const ROUTE_SEO: Record<
     title: 'Google Workspace Hub (Slides & Gmail) | ZENVEXA Digital Agency',
     description:
       'Manage client growth presentations in Google Slides and communicate directly via Gmail integrated into ZENVEXA.',
+  },
+  '/admin': {
+    title: 'Admin Bookings & Consultations Console | ZENVEXA Digital Agency',
+    description:
+      'Authorized administrator panel to manage all client bookings, consultations, scoping notes, and status updates.',
   },
   '/services/social-media-management': {
     title: 'Social Media Management | ZENVEXA Digital Agency',
